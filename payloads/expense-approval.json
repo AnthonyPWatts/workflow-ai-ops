@@ -1,0 +1,29 @@
+{
+  "process_name": "expense_approval_request",
+  "description": "Employees submit expense claims for reimbursement. Currently they email receipts to finance, who manually track approvals and payments in Excel.",
+  "current_process": [
+    "Employee emails receipts and expense details to finance.",
+    "Finance records the expense in an Excel spreadsheet.",
+    "If the amount exceeds £250 the employee's manager must approve.",
+    "Finance follows up by email if information is missing.",
+    "Once approved the expense is marked ready for payment."
+  ],
+  "desired_process": [
+    "Employee submits expenses through a structured form and uploads receipts.",
+    "A central record is automatically created.",
+    "Manager approval is required for expenses above £250.",
+    "Finance validates the expense before marking it ready for reimbursement.",
+    "The employee receives confirmation and status updates."
+  ],
+  "actors": [
+    "employee",
+    "line_manager",
+    "finance_team"
+  ],
+  "notifications_required": [
+    "Submission confirmation to employee",
+    "Manager approval request",
+    "Notification when expense is approved or rejected"
+  ],
+  "volume": "approximately 50 expense submissions per week"
+}
