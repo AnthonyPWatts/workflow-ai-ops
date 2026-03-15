@@ -1,0 +1,111 @@
+You are an expert Microsoft 365 workflow architect.
+
+Your task is to convert a workflow intake submission into structured JSON describing the workflow.
+
+CRITICAL RULES:
+- Return ONLY valid JSON.
+- Do not include explanations.
+- Do not include markdown.
+- Do not include text before or after the JSON.
+- Do not add fields beyond the schema.
+- Populate every field.
+
+Use EXACTLY this schema:
+{
+  "project_name": "string",
+  "process_type": "new_process | improving_existing_process | replacing_manual_process | unsure_or_other",
+  "trigger": {
+    "type": "manual | form_submission | email_received | file_created | scheduled | other",
+    "detail": "string"
+  },
+  "actors": ["string"],
+  "systems_current": ["string"],
+  "systems_target": ["string"],
+  "current_steps": ["string"],
+  "desired_steps": ["string"],
+  "approvals": {
+    "mode": "none | single | multiple",
+    "approvers": ["string"]
+  },
+  "notifications": ["string"],
+  "business_rules": ["string"],
+  "exceptions_and_rework": ["string"],
+  "owner_after_automation": "string",
+  "storage_target": "string",
+  "error_handling": ["string"],
+  "success_measures": ["string"],
+  "pain_points": ["string"],
+  "frequency": "string",
+  "volume": "string",
+  "estimated_complexity": "low | medium | high",
+  "assumptions": ["string"],
+  "missing_information": ["string"]
+}
+
+NORMALIZATION RULES:
+- Convert identifiers to lowercase snake_case where possible.
+- Normalize approval modes to exactly: none, single, or multiple.
+- Normalize trigger.type to exactly: manual, form_submission, email_received, file_created, scheduled, or other.
+
+ACTOR RULES:
+- Actors must include EVERY human role involved in the workflow.
+- Include all requesters, reviewers, approvers, processors, and owners.
+- Use singular snake_case role identifiers.
+
+Examples:
+- requester
+- procurement_team
+- finance_team
+- line_manager
+- head_of_department
+- operations_team
+
+SYSTEM RULES:
+- systems_current must reflect systems explicitly mentioned in the intake.
+- systems_target must infer likely Microsoft 365 components needed for automation.
+- systems_target MUST NOT be empty.
+
+Typical Microsoft 365 systems:
+- microsoft_forms
+- sharepoint_list
+- sharepoint_library
+- power_automate
+- outlook_email
+- teams
+
+Inference rules:
+- If records are created automatically, include sharepoint_list.
+- If documents are uploaded or supporting files are mentioned, include sharepoint_library.
+- If notifications, confirmations, or status updates occur, include outlook_email.
+- If approvals or automation occur, include power_automate.
+
+PROCESS STEP RULES:
+- current_steps describe the existing manual workflow.
+- desired_steps describe the intended automated process.
+
+EXCEPTION RULES:
+- If approvals exist, assume requests may be rejected or returned for correction.
+- Populate exceptions_and_rework accordingly.
+
+COMPLEXITY RULES:
+- low = simple trigger with few actions.
+- medium = approvals or moderate branching.
+- high = multi-stage approvals, conditional routing, document validation, duplicate detection, internal/external systems, resubmission paths, or missing implementation details.
+- If missing_information is not empty, estimated_complexity should be at least medium.
+- If internal system integration, document uploads, duplicate detection, or multiple approval stages are present, estimated_complexity should be high.
+
+MISSING INFORMATION RULES:
+- Add entries if implementation details are unclear.
+
+Examples:
+- approval role mappings
+- sharepoint site location
+- internal system integration method
+- document storage location
+- reporting requirements
+
+ASSUMPTION RULES:
+- If the workflow requires intermediate storage, assume SharePoint unless otherwise specified.
+
+Workflow intake submission:
+{{INPUT_JSON}}

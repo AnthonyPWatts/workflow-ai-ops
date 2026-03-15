@@ -1,0 +1,316 @@
+{
+  "name": "Workflow AI Ops",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "workflow-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "/home/node/.n8n-files/prompts/workflow-analysis.prompt"
+      },
+      "id": "2",
+      "name": "Read WA Prompt",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        460,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst promptTemplate = buffer\n  .toString('utf8')\n  .replace(/^\\uFEFF/, '')\n  .replace(/\\r\\n/g, '\\n');\n\nconst inputJson = JSON.stringify($('Webhook').first().json.body, null, 2);\nconst prompt = promptTemplate.replace('{{INPUT_JSON}}', inputJson);\n\nreturn [{\n  json: {\n    prompt_preview: promptTemplate.slice(0, 200),\n    prompt,\n  },\n}];"
+      },
+      "id": "3",
+      "name": "Assemble Prompt 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "string",
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'llama3', prompt: $json.prompt, stream: false, format: 'json', options: { temperature: 0 } }) }}",
+        "options": {}
+      },
+      "id": "4",
+      "name": "HTTP Request 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const raw = $json.response;\n\ntry {\n  return [{ json: JSON.parse(raw) }];\n} catch (err) {\n  return [{\n    json: {\n      error: 'Model did not return valid JSON',\n      parse_error: err.message,\n      raw_response: raw,\n    },\n  }];\n}"
+      },
+      "id": "5",
+      "name": "Code 1 Parse JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "return [{\n  json: {\n    workflow_analysis: $json,\n  },\n}];"
+      },
+      "id": "6",
+      "name": "Store Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1380,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "/home/node/.n8n-files/prompts/implementation-estimate.prompt"
+      },
+      "id": "7",
+      "name": "Read IE Prompt",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst promptTemplate = buffer\n  .toString('utf8')\n  .replace(/^\\uFEFF/, '')\n  .replace(/\\r\\n/g, '\\n');\n\nconst workflowAnalysis = $('Store Analysis').first().json.workflow_analysis;\nconst inputJson = JSON.stringify(workflowAnalysis, null, 2);\nconst prompt = promptTemplate.replace('{{INPUT_JSON}}', inputJson);\n\nreturn [{\n  json: {\n    workflow_analysis: workflowAnalysis,\n    prompt_preview: promptTemplate.slice(0, 200),\n    prompt,\n  },\n}];"
+      },
+      "id": "8",
+      "name": "Assemble Prompt 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "string",
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'phi3', prompt: $json.prompt, stream: false, format: 'json', options: { temperature: 0 } }) }}",
+        "options": {}
+      },
+      "id": "9",
+      "name": "HTTP Request 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2040,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const raw = $json.response;\nconst workflowAnalysis = $('Store Analysis').first().json.workflow_analysis;\n\ntry {\n  const parsed = JSON.parse(raw);\n  return [{\n    json: {\n      workflow_analysis: workflowAnalysis,\n      ...parsed,\n    },\n  }];\n} catch (err) {\n  return [{\n    json: {\n      workflow_analysis: workflowAnalysis,\n      error: 'Model did not return valid JSON',\n      parse_error: err.message,\n      raw_response: raw,\n    },\n  }];\n}"
+      },
+      "id": "10",
+      "name": "Code 2 Parse JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2260,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "return [{\n  json: {\n    workflow_analysis: $json.workflow_analysis,\n    implementation_estimate: {\n      estimate_hours_band: $json.estimate_hours_band,\n      delivery_risk: $json.delivery_risk,\n      key_prerequisites: $json.key_prerequisites,\n      open_questions: $json.open_questions,\n      implementation_outline: $json.implementation_outline,\n      review_required: $json.review_required,\n      review_reasons: $json.review_reasons,\n    },\n  },\n}];"
+      },
+      "id": "11",
+      "name": "Code 3 Final Shape",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "id": "12",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2700,
+        320
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read WA Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read WA Prompt": {
+      "main": [
+        [
+          {
+            "node": "Assemble Prompt 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Prompt 1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request 1": {
+      "main": [
+        [
+          {
+            "node": "Code 1 Parse JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code 1 Parse JSON": {
+      "main": [
+        [
+          {
+            "node": "Store Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Analysis": {
+      "main": [
+        [
+          {
+            "node": "Read IE Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read IE Prompt": {
+      "main": [
+        [
+          {
+            "node": "Assemble Prompt 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Prompt 2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request 2": {
+      "main": [
+        [
+          {
+            "node": "Code 2 Parse JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code 2 Parse JSON": {
+      "main": [
+        [
+          {
+            "node": "Code 3 Final Shape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code 3 Final Shape": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "generated-best-effort",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

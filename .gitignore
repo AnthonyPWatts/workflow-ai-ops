@@ -1,3 +1,24 @@
+# runtime data
+C:/AI-Ops-Data/
+AI-Ops-Data/
+
+# docker artifacts
+*.log
+*.db
+
+# node / temp
+node_modules/
+.tmp/
+
+# n8n runtime
+.n8n/
+
+# OS
+.DS_Store
+Thumbs.db
+
+## Everything below here is probably from some reasonable template. Hopefully
+
 # Logs
 logs
 *.log
