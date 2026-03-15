@@ -1,0 +1,127 @@
+{
+    "workflow_analysis": {
+        "project_name": "multi-stage_supplier_onboarding_and_purchasing_approval_workflow",
+        "process_type": "improving_existing_process",
+        "trigger": {
+            "type": "form_submission",
+            "detail": ""
+        },
+        "actors": [
+            "requester",
+            "procurement_team",
+            "finance_team",
+            "head_of_department",
+            "operations_team"
+        ],
+        "systems_current": [
+            "outlook_email",
+            "excel",
+            "sharepoint",
+            "external_website_or_service",
+            "another_internal_system"
+        ],
+        "systems_target": [
+            "microsoft_forms",
+            "sharepoint_list",
+            "power_automate",
+            "outlook_email"
+        ],
+        "current_steps": [
+            "Requester emails procurement with supplier details and attachments.",
+            "Procurement checks whether the supplier already exists, then copies details into Excel.",
+            "Procurement asks finance to validate bank details.",
+            "If the expected annual spend is high, head of department approval is requested.",
+            "Missing information is chased by email.",
+            "Once everything is approved, operations creates the supplier in the internal purchasing system.",
+            "Procurement sends a confirmation email back to the requester."
+        ],
+        "desired_steps": [
+            "A requester completes a structured form and uploads supporting documents.",
+            "A central record is created automatically.",
+            "Procurement reviews first.",
+            "Finance validates payment information.",
+            "Higher-value suppliers are routed for additional approval.",
+            "The requester should receive status updates at key stages.",
+            "Approved suppliers should be passed to the internal purchasing team with a clear action list.",
+            "Rejected or incomplete requests should be returned with reasons and be resubmittable."
+        ],
+        "approvals": {
+            "mode": "multiple",
+            "approvers": [
+                "procurement_team",
+                "finance_team",
+                "head_of_department"
+            ]
+        },
+        "notifications": [
+            "Requester should receive confirmation on submission.",
+            "Update when the request moves to finance review.",
+            "Update if more information is needed.",
+            "Update when approved or rejected.",
+            "Confirmation when the supplier has been created."
+        ],
+        "business_rules": [
+            "Suppliers expected to exceed 10000 annual spend require head of department approval.",
+            "Bank details must be verified by finance before activation.",
+            "If mandatory documents are missing, the request must be returned to the requester.",
+            "If a possible duplicate supplier is detected, procurement must review before the workflow can continue.",
+            "Requests should not progress to final creation until all mandatory approvals are complete."
+        ],
+        "exceptions_and_rework": [
+            "Requests may need to be reopened or corrected if something goes wrong later."
+        ],
+        "owner_after_automation": "procurement_team",
+        "storage_target": "another_internal_system",
+        "error_handling": [
+            "Notify a specific person"
+        ],
+        "success_measures": [
+            "Reduce onboarding delays.",
+            "Eliminate duplicate manual entry.",
+            "Give requesters visibility of status.",
+            "Reduce missing-document churn.",
+            "Provide auditability for approvals.",
+            "Make it easy to report on bottlenecks and average completion time."
+        ],
+        "pain_points": [
+            "Too much manual work.",
+            "Slow approvals.",
+            "Duplicate data entry.",
+            "Errors happen often.",
+            "Hard to track progress.",
+            "Information gets lost.",
+            "Difficult reporting."
+        ],
+        "frequency": "daily",
+        "volume": "15 to 25 supplier requests per week, with occasional bursts at month end",
+        "estimated_complexity": "medium",
+        "assumptions": [
+            "Assume SharePoint unless otherwise specified for intermediate storage."
+        ],
+        "missing_information": []
+    },
+    "implementation_estimate": {
+        "estimate_hours_band": "six_to_ten",
+        "delivery_risk": "medium",
+        "key_prerequisites": [
+            "SharePoint site and list location confirmed.",
+            "Microsoft Forms creation permission granted to procurement team.",
+            "Power Automate environment access for all teams ensured."
+        ],
+        "open_questions": [
+            "Approval thresholds defined?",
+            "Rejection behaviour clarified?"
+        ],
+        "implementation_outline": [
+            "Requester completes a structured form and uploads supporting documents using Microsoft Forms.",
+            "A central record is created automatically in SharePoint list upon submission through Power Automate flow.",
+            "Procurement team reviews the request, validates supplier details against existing records to avoid duplicates."
+        ],
+        "review_required": true,
+        "review_reasons": [
+            "Complex routing and approvals required due to multiple actors involved in different stages of review.",
+            "Business rules complexity involving financial validation by finance team before supplier activation.",
+            "Potential for missing information or incomplete documents requiring reopening requests."
+        ]
+    }
+}
